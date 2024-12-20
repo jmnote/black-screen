@@ -1,0 +1,9 @@
+{
+    "name": "Black Screen",
+    "description": "Black Screen Extension",
+    "version": "1.0",
+    "manifest_version": 3,
+    "action": {
+        "default_popup": "black-screen.html"
+    }
+}
