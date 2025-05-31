@@ -13,7 +13,7 @@ Perfect for reducing glare, resting your eyes, or staying focused.
 
 ## Install from Chrome Web Store
 
-- [Get it on Chrome Web Store](https://chromewebstore.google.com/search/Black%20Screen)
+- [Get it on Chrome Web Store](https://chromewebstore.google.com/detail/black-screen/bdcmhoaiaafaadfkfjcpchckgcdpagkj)
 
 ## License
 
