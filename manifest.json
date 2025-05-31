@@ -1,9 +1,24 @@
 {
-    "name": "Black Screen",
-    "description": "Black Screen Extension",
-    "version": "1.0",
     "manifest_version": 3,
+    "name": "Black Screen",
+    "version": "1.0.0",
+    "description": "A black screen at your fingertips",
+    "icons": {
+        "16": "images/icon-16.png",
+        "32": "images/icon-32.png",
+        "48": "images/icon-48.png",
+        "128": "images/icon-128.png"
+      },
+    "background": {
+        "service_worker": "service-worker.js"
+    },
     "action": {
-        "default_popup": "black-screen.html"
-    }
+        "default_icon": {
+            "16": "images/icon-16.png",
+            "32": "images/icon-32.png",
+            "48": "images/icon-48.png",
+            "128": "images/icon-128.png"
+        }
+    },
+    "homepage_url": "https://github.com/jmnote/black-screen"
 }

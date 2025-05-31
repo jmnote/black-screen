@@ -1,0 +1,23 @@
+<svg width="320" height="200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="320" height="200" fill="url(#gradient)" />
+  <defs>
+    <linearGradient id="gradient" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#667eea" />
+      <stop offset="100%" stop-color="#764ba2" />
+    </linearGradient>
+  </defs>
+
+  <!-- Browser top bar -->
+  <rect x="30" y="30" width="260" height="20" fill="#777" rx="5" ry="5" />
+  <rect x="30" y="40" width="260" height="10" fill="#777" />
+  <line x1="236" y1="40" x2="244" y2="40" stroke="#eee" stroke-width="1" />
+  <rect x="256" y="37" width="6" height="6" fill="none" stroke="#eee" stroke-width="1" />
+  <line x1="274" y1="37" x2="280" y2="43" stroke="#eee" stroke-width="1" />
+  <line x1="280" y1="37" x2="274" y2="43" stroke="#eee" stroke-width="1" />
+
+  <!-- Browser content -->
+  <rect x="30" y="50" width="260" height="60" fill="black" rx="0" ry="0" />
+  <rect x="30" y="50" width="260" height="120" fill="black" rx="5" ry="5" />
+  <text x="160" y="117" text-anchor="middle" fill="#666" font-size="16" font-family="Arial">Black Screen</text>
+</svg>
