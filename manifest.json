@@ -1,14 +1,14 @@
 {
     "manifest_version": 3,
     "name": "Black Screen",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "A black screen at your fingertips",
     "icons": {
         "16": "images/icon-16.png",
         "32": "images/icon-32.png",
         "48": "images/icon-48.png",
         "128": "images/icon-128.png"
-      },
+    },
     "background": {
         "service_worker": "service-worker.js"
     },
@@ -20,5 +20,9 @@
             "128": "images/icon-128.png"
         }
     },
-    "homepage_url": "https://github.com/jmnote/black-screen"
+    "chrome_url_overrides": {
+        "newtab": "black-screen.html"
+    },
+    "homepage_url": "https://chromewebstore.google.com/detail/black-screen/bdcmhoaiaafaadfkfjcpchckgcdpagkj",
+    "options_page": "options.html"
 }
