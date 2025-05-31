@@ -13,7 +13,7 @@
 
 - Opens a pure black screen in a new tab
 - No settings, no clutter — just black
-- Lightweight and private (requires no permissions)
+- Lightweight and private (no permissions required)
 
 ## Installation
 
