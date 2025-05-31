@@ -6,8 +6,8 @@
 
 ## Preview (conceptual)
 
-<img src="images/screen-window.png" alt="Windowed View" width="320" style="margin-right: 16px;" />
-<img src="images/screen-full.png" alt="Fullscreen View" width="320" />
+<img src="assets/screen-window.png" alt="Windowed View" width="320" style="margin-right: 16px;" />
+<img src="assets/screen-full.png" alt="Fullscreen View" width="320" />
 
 ## Features
 
