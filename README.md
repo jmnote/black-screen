@@ -2,18 +2,22 @@
 
 ![Black Screen Icon](images/icon-48.png)
 
-**Black Screen** is a minimal Chrome extension that opens a clean, distraction-free black screen in a new tab.  
-Perfect for reducing glare, resting your eyes, or staying focused.
+**Black Screen** is a minimal Chrome extension that replaces your new tab page with a pure black screen.
+
+## Preview (conceptual)
+
+<img src="assets/screen-window.png" alt="Windowed View" width="320" style="margin-right: 16px;" />
+<img src="assets/screen-full.png" alt="Fullscreen View" width="320" />
 
 ## Features
 
-- Opens a pure black screen in one click
-- No settings, no distractions
-- Lightweight and private (no permissions required)
+- Opens a pure black screen in a new tab
+- No settings, no clutter — just black
+- Lightweight and private (requires no permissions)
 
-## Install from Chrome Web Store
+## Installation
 
-- [Get it on Chrome Web Store](https://chromewebstore.google.com/detail/black-screen/bdcmhoaiaafaadfkfjcpchckgcdpagkj)
+You can install it from the [Chrome Web Store](https://chromewebstore.google.com/detail/black-screen/bdcmhoaiaafaadfkfjcpchckgcdpagkj).
 
 ## License
 
