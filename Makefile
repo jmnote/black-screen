@@ -1,7 +1,7 @@
 .PHONY: package
 
 package:
-	@echo "Packaging src/ into dist/black-screen.zip..."
+	@echo "Packaging dist/black-screen.zip..."
 	@rm -rf dist && mkdir dist
-	@cd src && zip -r ../dist/black-screen.zip .
+	@zip -r dist/black-screen.zip . -x ".git/*" "dist/*" "store/*"
 	@echo "✅ Done: dist/black-screen.zip created."

@@ -26,8 +26,8 @@ FEATURES:
 ### Graphic Assets
 
 **Store Icon**:  
-<a href="https://github.com/jmnote/black-screen/blob/main/src/images/icon-128.png">
-  <img src="../src/images/icon-128.png" alt="Store Icon" width="100" />
+<a href="https://github.com/jmnote/black-screen/blob/main/images/icon-128.png">
+  <img src="../images/icon-128.png" alt="Store Icon" width="100" />
 </a>
 
 **Screenshots**:  
