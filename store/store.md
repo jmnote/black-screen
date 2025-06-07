@@ -50,7 +50,7 @@ FEATURES:
 
 ### Additional Fields
 
-**Official URL**: None
+**Official URL**: jmnote.com
 
 **Homepage URL**: https://github.com/jmnote/black-screen
 
