@@ -6,14 +6,15 @@
 
 ## Preview (conceptual)
 
-<img src="assets/screen-window.png" alt="Windowed View" width="320" style="margin-right: 16px;" />
-<img src="assets/screen-full.png" alt="Fullscreen View" width="320" />
+<img src="store/assets/screen-window.png" alt="Windowed View" width="320" />
+<img src="store/assets/screen-full.png" alt="Fullscreen View" width="320" />
 
 ## Features
 
 - Opens a pure black screen in a new tab
 - No settings, no clutter — just black
 - Lightweight and private (no permissions required)
+- Fully open source at: https://github.com/jmnote/black-screen
 
 ## Installation
 

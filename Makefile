@@ -1,8 +1,7 @@
-DIST_NAME = black-screen.zip
-
 .PHONY: package
+
 package:
-	@echo "Creating $(DIST_NAME)..."
-	@rm -f $(DIST_NAME)
-	@zip -r $(DIST_NAME) . -x "$(DIST_NAME)" "*.git*" "assets/*"
-	@echo "✅ Done: $(DIST_NAME) created. Submit this to the Chrome Web Store."
+	@echo "Packaging dist/black-screen.zip..."
+	@rm -rf dist && mkdir dist
+	@zip -r dist/black-screen.zip . -x ".git/*" "dist/*" "store/*"
+	@echo "✅ Done: dist/black-screen.zip created."
