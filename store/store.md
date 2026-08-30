@@ -60,7 +60,7 @@ FEATURES:
 
 ### Additional metrics
 
-**Google Analytics 4 (GA4)**: Enabled (opted in)
+**Google Analytics 4 (GA4)**: Disabled
 
 ## Privacy
 
