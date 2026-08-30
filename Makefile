@@ -1,7 +1,11 @@
 .PHONY: package
 
+VERSION := $(shell jq -r '.version' manifest.json)
+PACKAGE := dist/black-screen-$(VERSION).zip
+
 package:
-	@echo "Packaging dist/black-screen.zip..."
-	@rm -rf dist && mkdir dist
-	@zip -r dist/black-screen.zip . -x ".git/*" "dist/*" "store/*"
-	@echo "✅ Done: dist/black-screen.zip created."
+	@echo "Packaging $(PACKAGE)..."
+	@mkdir -p dist
+	@rm -f $(PACKAGE)
+	@zip -r $(PACKAGE) manifest.json black-screen.html black-screen.js service-worker.js LICENSE images
+	@echo "✅ Done: $(PACKAGE) created."
