@@ -34,8 +34,9 @@
 - **Pure Black**: Opens an instant, distraction-free pure black screen in a new tab.
 - **Auto-hiding Cursor & Fullscreen Button**: The cursor and fullscreen button appear on interaction and automatically fade away after 1 second of inactivity.
 - **Fullscreen Toggle**: Use the on-screen button to enter or exit browser fullscreen mode. Press `Esc` to exit fullscreen.
+- **Bookmarks Bar**: Toggle an on-screen bookmarks bar that mirrors your browser's actual bookmarks bar, since replacing the new tab page hides Chrome's own one.
 - **Touch Support**: Touch start and movement reveal the cursor and fullscreen button on touch-enabled devices.
-- **Zero Permissions**: Completely lightweight, private, and offline-ready without requesting any browser permissions.
+- **Minimal Permissions**: Only reads your bookmarks and favicons to render the on-screen bookmarks bar — nothing is tracked, sent anywhere, or stored outside your browser.
 - **No Clutter**: No settings, no tracking, no ads — just black.
 
 ## Installation

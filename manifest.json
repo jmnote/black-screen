@@ -21,6 +21,10 @@
         }
     },
     "offline_enabled": true,
+    "permissions": [
+        "bookmarks",
+        "favicon"
+    ],
     "chrome_url_overrides": {
         "newtab": "black-screen.html"
     },
