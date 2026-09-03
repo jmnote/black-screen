@@ -1,0 +1,13 @@
+{
+    "name": "black-screen-hack",
+    "private": true,
+    "description": "Dev tooling for the Black Screen Chrome extension (no runtime dependencies — the extension itself is plain HTML/CSS/JS). Invoked via `make package`/`make screenshot` or `./build.ps1 package`/`./build.ps1 screenshot` from the repo root.",
+    "scripts": {
+        "package": "node package.js",
+        "screenshot": "node screenshot.js"
+    },
+    "devDependencies": {
+        "archiver": "^7.0.1",
+        "puppeteer": "^25.9.0"
+    }
+}
