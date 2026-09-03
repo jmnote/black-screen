@@ -1,9 +1,6 @@
 let hideTimeout = null;
-// While the pointer is over the bookmarks bar's item list (or an open
-// folder dropdown), the options menu, or the fullscreen button, the
-// auto-hide timer is suspended so whatever is under the pointer doesn't
-// disappear out from under it. These are independent flags: each area is
-// protected on its own, regardless of the others' state.
+// Each area suspends the auto-hide timer independently while hovered, so
+// whatever's under the pointer doesn't disappear out from under it.
 let isBookmarksBarHovered = false;
 let isFullscreenButtonHovered = false;
 let isOptionsMenuHovered = false;
@@ -24,13 +21,8 @@ function hideUI() {
     clearTimeout(hideTimeout);
     hideTimeout = null;
     document.body.classList.remove('active');
-    // A clicked button keeps browser focus after the click (without a
-    // visible focus ring), and `.top-bar:focus-within` — kept so keyboard
-    // users tabbing through the bar stay visible — would otherwise hold the
-    // bar up forever once that happens. Only clear that kind of leftover
-    // focus: a genuinely keyboard-focused element (:focus-visible) keeps
-    // its :focus-within protection instead of losing focus out from under
-    // whoever tabbed to it.
+    // Clear leftover focus from a click (not a real keyboard focus) so it
+    // can't hold the bar up via :focus-within forever. See docs/development.md.
     const active = document.activeElement;
     if (active instanceof HTMLElement && active !== document.body && !active.matches(':focus-visible')) {
         active.blur();
@@ -135,14 +127,12 @@ function closeAllBookmarkDropdowns() {
 }
 
 function closeDropdownTree(wrapper) {
-    // Closes this folder and any submenus still open inside it.
     closeFolder(wrapper);
     wrapper.querySelectorAll('.bookmarks-folder.open').forEach(closeFolder);
 }
 
 function closeSiblingDropdowns(wrapper) {
-    // Closing/opening a folder shouldn't collapse its ancestor chain — only
-    // other folders at the same level (inside the same parent list/dropdown).
+    // Only collapse sibling folders at the same level, not the ancestor chain.
     const parent = wrapper.parentElement;
     if (!parent) {
         return;
@@ -154,11 +144,9 @@ function closeSiblingDropdowns(wrapper) {
     });
 }
 
+// The dropdown is position:fixed (so scroll containers can't clip it), so
+// its coordinates are computed in JS instead of via CSS. See docs/development.md.
 function positionBookmarkDropdown(trigger, dropdown, placement) {
-    // The dropdown is position:fixed (so the bar's horizontal scroll
-    // container, or a parent dropdown's scroll, can't clip it), so its
-    // coordinates have to be computed in JS instead of via CSS positioning
-    // relative to an ancestor.
     const triggerRect = trigger.getBoundingClientRect();
 
     if (placement === 'side') {
@@ -206,11 +194,9 @@ function populateDropdown(dropdown, children) {
     });
 }
 
-// Builds a folder as an openable menu, for both the top-level bar (a
-// button that drops a panel below it) and folders nested inside another
-// dropdown (a menu row whose submenu cascades to the side) — recursing for
-// however many levels deep the bookmarks actually go, same as Chrome's own
-// bookmarks bar.
+// Builds a folder as an openable menu: a top-level bar button ('below') or
+// a nested cascading submenu row ('side'), recursing for however many
+// levels deep the bookmarks go.
 function createBookmarkFolderNode(node, placement) {
     const wrapper = document.createElement('div');
     wrapper.className = 'bookmarks-folder';
@@ -258,9 +244,7 @@ function createBookmarkFolderNode(node, placement) {
     });
 
     if (placement === 'side') {
-        // Nested submenus (everything past the top-level bar button) open on
-        // hover, like a real cascading menu — clicking still works too, for
-        // keyboard/touch use.
+        // Nested submenus open on hover, like a real cascading menu; click still works too.
         trigger.addEventListener('mouseenter', () => {
             if (!wrapper.classList.contains('open')) {
                 openFolder();
@@ -310,12 +294,8 @@ function getBookmarksBarNode(tree) {
 }
 
 async function loadBookmarksBar() {
-    // Re-rendering below wipes and rebuilds the bookmark elements, including
-    // any that's currently hovered — its mouseleave never fires since it's
-    // removed rather than actually left, so the hover-protection flag it set
-    // would otherwise stay stuck true and hold the top UI visible forever.
-    // Reset it and let a mouseenter on the new elements set it again if the
-    // pointer is still resting over the bar.
+    // Re-rendering replaces any hovered element without a mouseleave firing,
+    // so reset the stuck hover flag here. See docs/development.md.
     isBookmarksBarHovered = false;
     if (!(window.chrome && chrome.bookmarks && chrome.bookmarks.getTree)) {
         renderEmptyBookmarksNotice('Bookmarks unavailable');
@@ -331,11 +311,8 @@ async function loadBookmarksBar() {
     showUI();
 }
 
-// Keep the bar in sync with bookmark changes made elsewhere (Chrome's own
-// bookmarks UI, sync from another device, etc.) instead of only reflecting
-// whatever the tree looked like when this tab first loaded. A full re-fetch
-// is simplest and cheap enough — these events fire rarely compared to a
-// user's mouse movements.
+// Keep the bar in sync with bookmark changes made elsewhere (Chrome's own UI,
+// sync from another device, etc.) by re-fetching the whole tree on any change.
 if (window.chrome && chrome.bookmarks && chrome.bookmarks.onCreated) {
     chrome.bookmarks.onCreated.addListener(loadBookmarksBar);
     chrome.bookmarks.onRemoved.addListener(loadBookmarksBar);
@@ -358,17 +335,13 @@ registerHoverProtection(fullscreenButton, (hovered) => {
     isFullscreenButtonHovered = hovered;
 });
 
-// Covers the toggle button and the open dropdown together, the same way a
-// bookmarks folder's wrapper does — otherwise the bar can fade out mid-menu
-// while the pointer is resting right on it.
+// Covers the toggle button and its dropdown together, so the bar doesn't
+// fade out mid-menu while the pointer is resting on it.
 registerHoverProtection(optionsMenu, (hovered) => {
     isOptionsMenuHovered = hovered;
 });
 
-// Deliberately not on bookmarksList itself: hover protection is scoped to
-// actual bookmark items/folders (and their dropdowns), not the empty gaps
-// between them or the plain-text "No bookmarks" notice — those aren't
-// interactive elements, so they shouldn't act like one.
+// Deliberately not on bookmarksList itself — see docs/development.md.
 
 const BOOKMARKS_VISIBLE_STORAGE_KEY = 'bookmarksVisible';
 
@@ -437,11 +410,9 @@ function closeSettingsModal() {
 }
 
 optionsToggleButton.addEventListener('click', () => {
-    // No stopPropagation here (unlike the bookmarks folder triggers): this
-    // click needs to reach the document-level handler below so opening the
-    // options menu also closes any open bookmarks folder dropdown. The
-    // handler's own `.closest('.options-menu')` check already keeps it from
-    // closing the menu this same click just opened.
+    // No stopPropagation: this needs to reach the document click handler
+    // below, which closes bookmark dropdowns (its own .options-menu check
+    // keeps it from closing the menu this same click just opened).
     toggleOptionsMenu();
 });
 
@@ -492,9 +463,7 @@ function getSettingsModalFocusables() {
     ).filter((el) => !el.disabled && el.offsetParent !== null);
 }
 
-// aria-modal="true" promises Tab/Shift+Tab stay inside the dialog. Nothing
-// else enforces that on its own, so cycle focus between the modal's first
-// and last focusable elements manually while it's open.
+// Manual focus trap for the settings modal — see docs/development.md.
 document.addEventListener('keydown', (event) => {
     if (event.key !== 'Tab' || !isSettingsModalOpen) {
         return;
@@ -514,10 +483,8 @@ document.addEventListener('keydown', (event) => {
     }
 });
 
-// An open dropdown's position is computed once, from the trigger's
-// coordinates at that moment. Scrolling the bar or resizing the window
-// would leave it floating in the wrong spot, so just close it instead of
-// tracking and repositioning it continuously.
+// A dropdown's position is computed once; close it instead of repositioning
+// it on scroll/resize.
 window.addEventListener('resize', closeAllBookmarkDropdowns);
 bookmarksList.addEventListener('scroll', closeAllBookmarkDropdowns);
 
