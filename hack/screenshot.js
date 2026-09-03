@@ -3,9 +3,14 @@
 // on-screen bookmarks bar has something to show, then composites the
 // captured page — in a few different states — into a mock Chrome window
 // (tab strip + toolbar, rounded corners, drop shadow) floating on a soft
-// gradient backdrop, while the overall canvas still lands on the Chrome Web
-// Store's required 1280x800. The fullscreen scenario is the exception: it
-// skips that mock frame, since real fullscreen has no browser chrome.
+// gradient backdrop, on the Chrome Web Store's smaller allowed canvas,
+// 640x400. Deliberately not the larger 1280x800: at that size the mock
+// chrome and the extension's own on-screen UI (bookmarks bar, Settings)
+// render tiny once shrunk to a README thumbnail, whereas the 640x400 canvas
+// makes them all proportionally bigger for free — the chrome/UI's own CSS
+// pixel sizes don't change, but there's less canvas for them to be a small
+// fraction of. The fullscreen scenario is the exception: it skips that mock
+// frame, since real fullscreen has no browser chrome.
 //
 // Note: this must run against Chrome for Testing / Chromium, not a
 // consumer "Google Chrome" install — Google Chrome hard-blocks the
@@ -35,41 +40,17 @@ const SCENARIOS = [
     { file: 'screenshot3-settings.png', bookmarksVisible: false, openSettings: true },
 ];
 
-// Chrome Web Store screenshots must be exactly 1280x800 (or 640x400), so
-// the final canvas stays that size — the window floats inside it on a
-// margin, rather than the canvas growing to fit a full-size window.
-const FRAME_WIDTH = 1280;
-const FRAME_HEIGHT = 800;
+// Chrome Web Store screenshots must be exactly 1280x800 or 640x400 — the
+// final canvas stays that size, with the window floating inside it on a
+// margin, rather than growing to fit a full-size window.
+const FRAME_WIDTH = 640;
+const FRAME_HEIGHT = 400;
 const WINDOW_MARGIN = 48;
 const WINDOW_WIDTH = FRAME_WIDTH - WINDOW_MARGIN * 2;
 const WINDOW_HEIGHT = FRAME_HEIGHT - WINDOW_MARGIN * 2;
 const TAB_STRIP_HEIGHT = 36;
 const TOOLBAR_HEIGHT = 40;
 const CONTENT_HEIGHT = WINDOW_HEIGHT - TAB_STRIP_HEIGHT - TOOLBAR_HEIGHT;
-
-// The extension's own page (everything below, not the mock browser chrome
-// around it) is captured at half its final size in CSS pixels but twice the
-// device scale factor — the same trick as setting a display to 200%
-// scaling. Its fixed-size UI (bookmarks bar text/icons, the Settings modal)
-// ends up rendered proportionally larger, so it's still legible once these
-// screenshots are shrunk down for the README, while the output pixel
-// dimensions — and the Chrome Web Store's required 1280x800 — don't change.
-const CONTENT_ZOOM = 2;
-
-// The mock browser chrome (tab strip + toolbar) and the gradient margin
-// around it get the same zoom treatment, so they read at the same visual
-// weight as the already-zoomed content instead of looking comparatively
-// tiny. The frame page is laid out and captured at half size (same trick as
-// CONTENT_ZOOM above), but the chrome's own measurements — TAB_STRIP_HEIGHT,
-// TOOLBAR_HEIGHT, and every literal px value inside buildFrameHtml's
-// <style> — are deliberately left unscaled, so they end up proportionally
-// bigger against the smaller frame/window/margin around them.
-const ZOOMED_FRAME_WIDTH = FRAME_WIDTH / CONTENT_ZOOM;
-const ZOOMED_FRAME_HEIGHT = FRAME_HEIGHT / CONTENT_ZOOM;
-const ZOOMED_WINDOW_MARGIN = WINDOW_MARGIN / CONTENT_ZOOM;
-const ZOOMED_WINDOW_WIDTH = ZOOMED_FRAME_WIDTH - ZOOMED_WINDOW_MARGIN * 2;
-const ZOOMED_WINDOW_HEIGHT = ZOOMED_FRAME_HEIGHT - ZOOMED_WINDOW_MARGIN * 2;
-const ZOOMED_CONTENT_BOX_HEIGHT = ZOOMED_WINDOW_HEIGHT - TAB_STRIP_HEIGHT - TOOLBAR_HEIGHT;
 
 const SAMPLE_BOOKMARKS = [
     { title: 'GitHub', url: 'https://github.com' },
@@ -135,8 +116,8 @@ function buildFrameHtml({ contentDataUri, faviconDataUri }) {
 <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html, body {
-        width: ${ZOOMED_FRAME_WIDTH}px;
-        height: ${ZOOMED_FRAME_HEIGHT}px;
+        width: ${FRAME_WIDTH}px;
+        height: ${FRAME_HEIGHT}px;
         overflow: hidden;
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
@@ -148,8 +129,8 @@ function buildFrameHtml({ contentDataUri, faviconDataUri }) {
         background: linear-gradient(135deg, #42d292, #647fff);
     }
     .window {
-        width: ${ZOOMED_WINDOW_WIDTH}px;
-        height: ${ZOOMED_WINDOW_HEIGHT}px;
+        width: ${WINDOW_WIDTH}px;
+        height: ${WINDOW_HEIGHT}px;
         background: #fff;
         border-radius: 10px;
         overflow: hidden;
@@ -238,12 +219,8 @@ function buildFrameHtml({ contentDataUri, faviconDataUri }) {
     .omnibox .placeholder { font-size: 12.5px; color: #5f6368; }
     .right-icons { display: flex; align-items: center; gap: 16px; margin-left: 4px; color: #5f6368; }
     .avatar { width: 20px; height: 20px; border-radius: 50%; background: #1a73e8; flex: none; }
-    .content { width: ${ZOOMED_WINDOW_WIDTH}px; height: ${ZOOMED_CONTENT_BOX_HEIGHT}px; }
-    /* The captured content image is taller than this box now that the
-       chrome above it (tab strip + toolbar) takes up relatively more of the
-       window — cover+top crops the excess off the bottom (empty black
-       background in every scenario) instead of squashing the image. */
-    .content img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top; }
+    .content { width: ${WINDOW_WIDTH}px; height: ${CONTENT_HEIGHT}px; }
+    .content img { display: block; width: 100%; height: 100%; }
 </style>
 </head>
 <body>
@@ -283,22 +260,16 @@ function buildFrameHtml({ contentDataUri, faviconDataUri }) {
 
 // Real fullscreen has no browser chrome at all, so unlike the other
 // scenarios this shot skips the mock frame entirely — it's the raw page,
-// filling the full 1280x800 canvas, the same as it fills the actual screen.
+// filling the full 640x400 canvas, the same as it fills the actual screen.
 async function captureFullscreenScreenshot(browser) {
     const page = await browser.newPage();
-    await page.setViewport({
-        width: FRAME_WIDTH / CONTENT_ZOOM,
-        height: FRAME_HEIGHT / CONTENT_ZOOM,
-        deviceScaleFactor: CONTENT_ZOOM,
-    });
+    await page.setViewport({ width: FRAME_WIDTH, height: FRAME_HEIGHT, deviceScaleFactor: 1 });
     await page.goto('chrome://newtab/', { waitUntil: 'networkidle0' });
     await page.evaluate(() => localStorage.setItem('bookmarksVisible', 'false'));
     await page.reload({ waitUntil: 'networkidle0' });
 
-    // Mouse coordinates are in CSS pixels — the (zoomed-out) viewport size,
-    // not the final FRAME_WIDTH/HEIGHT pixel output.
-    await page.mouse.move(FRAME_WIDTH / CONTENT_ZOOM / 2, 10);
-    await page.mouse.move(FRAME_WIDTH / CONTENT_ZOOM / 2 + 1, 11);
+    await page.mouse.move(FRAME_WIDTH / 2, 10);
+    await page.mouse.move(FRAME_WIDTH / 2 + 1, 11);
     await page.waitForSelector('.fullscreen-button');
     await page.click('.fullscreen-button');
     await new Promise((resolve) => setTimeout(resolve, 300));
@@ -320,10 +291,9 @@ async function captureScenario(page, { bookmarksVisible, openSettings }) {
     await page.evaluate((visible) => localStorage.setItem('bookmarksVisible', String(visible)), bookmarksVisible);
     await page.reload({ waitUntil: 'networkidle0' });
 
-    // Reveal the top bar. Coordinates are in CSS pixels, i.e. the zoomed-out
-    // viewport size, not WINDOW_WIDTH (the eventual output pixel width).
-    await page.mouse.move(WINDOW_WIDTH / CONTENT_ZOOM / 2, 10);
-    await page.mouse.move(WINDOW_WIDTH / CONTENT_ZOOM / 2 + 1, 11);
+    // Reveal the top bar.
+    await page.mouse.move(WINDOW_WIDTH / 2, 10);
+    await page.mouse.move(WINDOW_WIDTH / 2 + 1, 11);
     await page.waitForSelector('.options-toggle');
 
     if (bookmarksVisible) {
@@ -362,13 +332,9 @@ async function main() {
             `--user-data-dir=${profileDir}`,
             '--no-first-run',
             '--no-default-browser-check',
-            `--window-size=${WINDOW_WIDTH / CONTENT_ZOOM},${CONTENT_HEIGHT / CONTENT_ZOOM + 100}`,
+            `--window-size=${WINDOW_WIDTH},${CONTENT_HEIGHT + 100}`,
         ],
-        defaultViewport: {
-            width: WINDOW_WIDTH / CONTENT_ZOOM,
-            height: CONTENT_HEIGHT / CONTENT_ZOOM,
-            deviceScaleFactor: CONTENT_ZOOM,
-        },
+        defaultViewport: { width: WINDOW_WIDTH, height: CONTENT_HEIGHT },
     });
 
     try {
@@ -387,11 +353,7 @@ async function main() {
             const contentBase64 = await captureScenario(page, scenario);
 
             const framePage = await browser.newPage();
-            await framePage.setViewport({
-                width: ZOOMED_FRAME_WIDTH,
-                height: ZOOMED_FRAME_HEIGHT,
-                deviceScaleFactor: CONTENT_ZOOM,
-            });
+            await framePage.setViewport({ width: FRAME_WIDTH, height: FRAME_HEIGHT, deviceScaleFactor: 1 });
             await framePage.setContent(
                 buildFrameHtml({
                     contentDataUri: `data:image/png;base64,${contentBase64}`,
