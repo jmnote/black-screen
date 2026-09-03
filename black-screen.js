@@ -31,6 +31,18 @@ function hideUI() {
 
 function showUI() {
     document.body.classList.add('active');
+    refreshHideTimer();
+}
+
+// Re-evaluates the hide timer against the current hover/modal flags without
+// making the UI visible — unlike showUI(), a no-op while it's already
+// hidden. Used where a flag can change without user interaction (e.g. a
+// bookmarks re-render resetting isBookmarksBarHovered), so that doesn't
+// itself pop the toolbar up.
+function refreshHideTimer() {
+    if (!document.body.classList.contains('active')) {
+        return;
+    }
     clearTimeout(hideTimeout);
     hideTimeout =
         (isBookmarksBarHovered || isFullscreenButtonHovered || isOptionsMenuHovered || isSettingsModalOpen)
@@ -299,7 +311,7 @@ async function loadBookmarksBar() {
     isBookmarksBarHovered = false;
     if (!(window.chrome && chrome.bookmarks && chrome.bookmarks.getTree)) {
         renderEmptyBookmarksNotice('Bookmarks unavailable');
-        showUI();
+        refreshHideTimer();
         return;
     }
     try {
@@ -308,7 +320,7 @@ async function loadBookmarksBar() {
     } catch (error) {
         renderEmptyBookmarksNotice('Bookmarks unavailable');
     }
-    showUI();
+    refreshHideTimer();
 }
 
 // Keep the bar in sync with bookmark changes made elsewhere (Chrome's own UI,
