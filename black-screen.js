@@ -310,8 +310,16 @@ function getBookmarksBarNode(tree) {
 }
 
 async function loadBookmarksBar() {
+    // Re-rendering below wipes and rebuilds the bookmark elements, including
+    // any that's currently hovered — its mouseleave never fires since it's
+    // removed rather than actually left, so the hover-protection flag it set
+    // would otherwise stay stuck true and hold the top UI visible forever.
+    // Reset it and let a mouseenter on the new elements set it again if the
+    // pointer is still resting over the bar.
+    isBookmarksBarHovered = false;
     if (!(window.chrome && chrome.bookmarks && chrome.bookmarks.getTree)) {
         renderEmptyBookmarksNotice('Bookmarks unavailable');
+        showUI();
         return;
     }
     try {
@@ -320,6 +328,7 @@ async function loadBookmarksBar() {
     } catch (error) {
         renderEmptyBookmarksNotice('Bookmarks unavailable');
     }
+    showUI();
 }
 
 // Keep the bar in sync with bookmark changes made elsewhere (Chrome's own
