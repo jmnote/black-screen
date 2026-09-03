@@ -42,6 +42,15 @@ const TAB_STRIP_HEIGHT = 36;
 const TOOLBAR_HEIGHT = 40;
 const CONTENT_HEIGHT = WINDOW_HEIGHT - TAB_STRIP_HEIGHT - TOOLBAR_HEIGHT;
 
+// The extension's own page (everything below, not the mock browser chrome
+// around it) is captured at half its final size in CSS pixels but twice the
+// device scale factor — the same trick as setting a display to 200%
+// scaling. Its fixed-size UI (bookmarks bar text/icons, the Settings modal)
+// ends up rendered proportionally larger, so it's still legible once these
+// screenshots are shrunk down for the README, while the output pixel
+// dimensions — and the Chrome Web Store's required 1280x800 — don't change.
+const CONTENT_ZOOM = 2;
+
 const SAMPLE_BOOKMARKS = [
     { title: 'GitHub', url: 'https://github.com' },
     { title: 'Wikipedia', url: 'https://www.wikipedia.org' },
@@ -253,13 +262,19 @@ function buildFrameHtml({ contentDataUri, faviconDataUri }) {
 // filling the full 1280x800 canvas, the same as it fills the actual screen.
 async function captureFullscreenScreenshot(browser) {
     const page = await browser.newPage();
-    await page.setViewport({ width: FRAME_WIDTH, height: FRAME_HEIGHT, deviceScaleFactor: 1 });
+    await page.setViewport({
+        width: FRAME_WIDTH / CONTENT_ZOOM,
+        height: FRAME_HEIGHT / CONTENT_ZOOM,
+        deviceScaleFactor: CONTENT_ZOOM,
+    });
     await page.goto('chrome://newtab/', { waitUntil: 'networkidle0' });
     await page.evaluate(() => localStorage.setItem('bookmarksVisible', 'false'));
     await page.reload({ waitUntil: 'networkidle0' });
 
-    await page.mouse.move(FRAME_WIDTH / 2, 10);
-    await page.mouse.move(FRAME_WIDTH / 2 + 1, 11);
+    // Mouse coordinates are in CSS pixels — the (zoomed-out) viewport size,
+    // not the final FRAME_WIDTH/HEIGHT pixel output.
+    await page.mouse.move(FRAME_WIDTH / CONTENT_ZOOM / 2, 10);
+    await page.mouse.move(FRAME_WIDTH / CONTENT_ZOOM / 2 + 1, 11);
     await page.waitForSelector('.fullscreen-button');
     await page.click('.fullscreen-button');
     await new Promise((resolve) => setTimeout(resolve, 300));
@@ -281,9 +296,10 @@ async function captureScenario(page, { bookmarksVisible, openSettings }) {
     await page.evaluate((visible) => localStorage.setItem('bookmarksVisible', String(visible)), bookmarksVisible);
     await page.reload({ waitUntil: 'networkidle0' });
 
-    // Reveal the top bar.
-    await page.mouse.move(WINDOW_WIDTH / 2, 10);
-    await page.mouse.move(WINDOW_WIDTH / 2 + 1, 11);
+    // Reveal the top bar. Coordinates are in CSS pixels, i.e. the zoomed-out
+    // viewport size, not WINDOW_WIDTH (the eventual output pixel width).
+    await page.mouse.move(WINDOW_WIDTH / CONTENT_ZOOM / 2, 10);
+    await page.mouse.move(WINDOW_WIDTH / CONTENT_ZOOM / 2 + 1, 11);
     await page.waitForSelector('.options-toggle');
 
     if (bookmarksVisible) {
@@ -317,9 +333,13 @@ async function main() {
             `--user-data-dir=${profileDir}`,
             '--no-first-run',
             '--no-default-browser-check',
-            `--window-size=${WINDOW_WIDTH},${CONTENT_HEIGHT + 100}`,
+            `--window-size=${WINDOW_WIDTH / CONTENT_ZOOM},${CONTENT_HEIGHT / CONTENT_ZOOM + 100}`,
         ],
-        defaultViewport: { width: WINDOW_WIDTH, height: CONTENT_HEIGHT },
+        defaultViewport: {
+            width: WINDOW_WIDTH / CONTENT_ZOOM,
+            height: CONTENT_HEIGHT / CONTENT_ZOOM,
+            deviceScaleFactor: CONTENT_ZOOM,
+        },
     });
 
     try {
