@@ -322,6 +322,20 @@ async function loadBookmarksBar() {
     }
 }
 
+// Keep the bar in sync with bookmark changes made elsewhere (Chrome's own
+// bookmarks UI, sync from another device, etc.) instead of only reflecting
+// whatever the tree looked like when this tab first loaded. A full re-fetch
+// is simplest and cheap enough — these events fire rarely compared to a
+// user's mouse movements.
+if (window.chrome && chrome.bookmarks && chrome.bookmarks.onCreated) {
+    chrome.bookmarks.onCreated.addListener(loadBookmarksBar);
+    chrome.bookmarks.onRemoved.addListener(loadBookmarksBar);
+    chrome.bookmarks.onChanged.addListener(loadBookmarksBar);
+    chrome.bookmarks.onMoved.addListener(loadBookmarksBar);
+    chrome.bookmarks.onChildrenReordered.addListener(loadBookmarksBar);
+    chrome.bookmarks.onImportEnded.addListener(loadBookmarksBar);
+}
+
 window.addEventListener('mousemove', showUI);
 window.addEventListener('mousedown', showUI);
 window.addEventListener('keydown', showUI);
@@ -460,6 +474,34 @@ document.addEventListener('keydown', (event) => {
         if (settingsOverlay.classList.contains('open')) {
             closeSettingsModal();
         }
+    }
+});
+
+function getSettingsModalFocusables() {
+    return Array.from(
+        settingsOverlay.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])')
+    ).filter((el) => !el.disabled && el.offsetParent !== null);
+}
+
+// aria-modal="true" promises Tab/Shift+Tab stay inside the dialog. Nothing
+// else enforces that on its own, so cycle focus between the modal's first
+// and last focusable elements manually while it's open.
+document.addEventListener('keydown', (event) => {
+    if (event.key !== 'Tab' || !isSettingsModalOpen) {
+        return;
+    }
+    const focusables = getSettingsModalFocusables();
+    if (!focusables.length) {
+        return;
+    }
+    const first = focusables[0];
+    const last = focusables[focusables.length - 1];
+    if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
     }
 });
 
