@@ -18,6 +18,10 @@
             /* The only two text/icon colors used anywhere on the page. */
             --color-text: rgba(255, 255, 255, 0.6);
             --color-text-hover: rgba(255, 255, 255, 0.8);
+            /* The <meta name="color-scheme"> tag alone doesn't reliably
+               darken native popups (e.g. the <select> options list) —
+               this is what actually does it. */
+            color-scheme: dark;
         }
 
         html,
@@ -109,11 +113,6 @@
 
         body.bookmarks-visible .bookmarks-bar__list {
             display: flex;
-        }
-
-        html:fullscreen .bookmarks-toggle,
-        html:fullscreen .bookmarks-bar__list {
-            display: none;
         }
 
         .bookmarks-bar__list::-webkit-scrollbar {
@@ -271,18 +270,137 @@
             color: var(--color-text);
             font-size: 0.75rem;
         }
+
+        .options-menu {
+            position: relative;
+        }
+
+        .options-dropdown {
+            position: absolute;
+            top: calc(100% + 4px);
+            right: 0;
+            display: none;
+            flex-direction: column;
+            min-width: 9rem;
+            padding: 0.3rem;
+            background: rgba(20, 20, 20, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 0.5em;
+            box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.4);
+            z-index: 3;
+        }
+
+        .options-dropdown.open {
+            display: flex;
+        }
+
+        .options-dropdown__item {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            font: inherit;
+            font-size: 0.8rem;
+            border: none;
+            background: transparent;
+            color: var(--color-text);
+            padding: 0.45em 0.6em;
+            border-radius: 0.3em;
+            text-align: left;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: background-color 0.15s ease, color 0.15s ease;
+        }
+
+        .options-dropdown__item:hover,
+        .options-dropdown__item:focus-visible {
+            background: rgba(255, 255, 255, 0.12);
+            color: var(--color-text-hover);
+            outline: none;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.6);
+            cursor: default;
+            z-index: 10;
+        }
+
+        .modal-overlay.open {
+            display: flex;
+        }
+
+        .modal {
+            width: min(22rem, 90vw);
+            background: rgba(20, 20, 20, 0.97);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 0.6em;
+            box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.4);
+            color: var(--color-text);
+            padding: 1rem 1.2rem 1.2rem;
+        }
+
+        .modal__header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .modal__header h2 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--color-text-hover);
+        }
+
+        .modal__close {
+            flex: none;
+            width: 1.8em;
+            height: 1.8em;
+        }
+
+        .modal__close svg {
+            width: 1rem;
+            height: 1rem;
+        }
+
+        .modal__body {
+            padding: 0.3rem 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .modal__option {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            padding: 0.5rem 0.1rem;
+            cursor: pointer;
+        }
+
+        .modal__option input {
+            width: 1rem;
+            height: 1rem;
+            accent-color: rgba(255, 255, 255, 0.8);
+            cursor: pointer;
+        }
+
+        .modal__footer {
+            margin-top: 0.75rem;
+            font-size: 0.7rem;
+            color: rgba(255, 255, 255, 0.35);
+            text-align: right;
+        }
     </style>
 </head>
 
 <body>
     <div class="top-bar">
-        <button class="icon-button bookmarks-toggle" type="button" aria-label="Bookmarks bar" title="Bookmarks bar"
-            aria-pressed="false">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
-            </svg>
-        </button>
-
         <div class="bookmarks-bar__list" id="bookmarksList"></div>
 
         <button class="icon-button fullscreen-button" type="button" aria-label="Fullscreen" title="Fullscreen"
@@ -292,6 +410,40 @@
                     d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3" />
             </svg>
         </button>
+
+        <div class="options-menu">
+            <button class="icon-button options-toggle" type="button" aria-label="More options" title="More options"
+                aria-haspopup="true" aria-expanded="false">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <circle cx="12" cy="5" r="1.8" fill="currentColor" stroke="none" />
+                    <circle cx="12" cy="12" r="1.8" fill="currentColor" stroke="none" />
+                    <circle cx="12" cy="19" r="1.8" fill="currentColor" stroke="none" />
+                </svg>
+            </button>
+            <div class="options-dropdown">
+                <button class="options-dropdown__item" type="button" data-action="settings">Settings</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="settingsOverlay">
+        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+            <div class="modal__header">
+                <h2 id="settingsTitle">Settings</h2>
+                <button class="icon-button modal__close" type="button" aria-label="Close">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M6 6l12 12M18 6L6 18" />
+                    </svg>
+                </button>
+            </div>
+            <div class="modal__body">
+                <label class="modal__option">
+                    <input type="checkbox" id="settingsBookmarksVisible" />
+                    <span>Show bookmarks bar</span>
+                </label>
+            </div>
+            <div class="modal__footer" id="settingsVersion"></div>
+        </div>
     </div>
 
     <script src="black-screen.js"></script>

@@ -1,27 +1,49 @@
 let hideTimeout = null;
-// While the pointer is over the bookmarks bar's left-hand area (the toggle
-// button, the item list, or an open folder dropdown) OR over the fullscreen
-// button, the auto-hide timer is suspended so whatever is under the pointer
-// doesn't disappear out from under it. These are two independent flags: the
-// fullscreen button is protected on its own, regardless of whether the
-// bookmarks bar is on.
+// While the pointer is over the bookmarks bar's item list (or an open
+// folder dropdown), the options menu, or the fullscreen button, the
+// auto-hide timer is suspended so whatever is under the pointer doesn't
+// disappear out from under it. These are independent flags: each area is
+// protected on its own, regardless of the others' state.
 let isBookmarksBarHovered = false;
 let isFullscreenButtonHovered = false;
+let isOptionsMenuHovered = false;
+let isSettingsModalOpen = false;
 const HIDE_DELAY = 1000;
 const fullscreenButton = document.querySelector('.fullscreen-button');
-const bookmarksToggleButton = document.querySelector('.bookmarks-toggle');
 const bookmarksList = document.getElementById('bookmarksList');
+const optionsMenu = document.querySelector('.options-menu');
+const optionsToggleButton = document.querySelector('.options-toggle');
+const optionsDropdown = document.querySelector('.options-dropdown');
+const settingsMenuItem = document.querySelector('.options-dropdown__item[data-action="settings"]');
+const settingsOverlay = document.getElementById('settingsOverlay');
+const settingsCloseButton = document.querySelector('.modal__close');
+const settingsBookmarksVisibleInput = document.getElementById('settingsBookmarksVisible');
+const settingsVersion = document.getElementById('settingsVersion');
 
 function hideUI() {
     clearTimeout(hideTimeout);
     hideTimeout = null;
     document.body.classList.remove('active');
+    // A clicked button keeps browser focus after the click (without a
+    // visible focus ring), and `.top-bar:focus-within` — kept so keyboard
+    // users tabbing through the bar stay visible — would otherwise hold the
+    // bar up forever once that happens. Only clear that kind of leftover
+    // focus: a genuinely keyboard-focused element (:focus-visible) keeps
+    // its :focus-within protection instead of losing focus out from under
+    // whoever tabbed to it.
+    const active = document.activeElement;
+    if (active instanceof HTMLElement && active !== document.body && !active.matches(':focus-visible')) {
+        active.blur();
+    }
 }
 
 function showUI() {
     document.body.classList.add('active');
     clearTimeout(hideTimeout);
-    hideTimeout = (isBookmarksBarHovered || isFullscreenButtonHovered) ? null : setTimeout(hideUI, HIDE_DELAY);
+    hideTimeout =
+        (isBookmarksBarHovered || isFullscreenButtonHovered || isOptionsMenuHovered || isSettingsModalOpen)
+            ? null
+            : setTimeout(hideUI, HIDE_DELAY);
 }
 
 function registerHoverProtection(element, setHovered) {
@@ -313,7 +335,17 @@ registerHoverProtection(fullscreenButton, (hovered) => {
     isFullscreenButtonHovered = hovered;
 });
 
-registerBookmarksHoverProtection(bookmarksToggleButton);
+// Covers the toggle button and the open dropdown together, the same way a
+// bookmarks folder's wrapper does — otherwise the bar can fade out mid-menu
+// while the pointer is resting right on it.
+registerHoverProtection(optionsMenu, (hovered) => {
+    isOptionsMenuHovered = hovered;
+});
+
+// Deliberately not on bookmarksList itself: hover protection is scoped to
+// actual bookmark items/folders (and their dropdowns), not the empty gaps
+// between them or the plain-text "No bookmarks" notice — those aren't
+// interactive elements, so they shouldn't act like one.
 
 const BOOKMARKS_VISIBLE_STORAGE_KEY = 'bookmarksVisible';
 
@@ -338,11 +370,69 @@ function saveBookmarksVisible(isVisible) {
 
 function setBookmarksVisible(isVisible) {
     document.body.classList.toggle('bookmarks-visible', isVisible);
-    bookmarksToggleButton.setAttribute('aria-pressed', String(isVisible));
 }
 
-function toggleBookmarksBar() {
-    const isVisible = !document.body.classList.contains('bookmarks-visible');
+function closeOptionsMenu() {
+    optionsDropdown.classList.remove('open');
+    optionsToggleButton.setAttribute('aria-expanded', 'false');
+}
+
+function toggleOptionsMenu() {
+    const isOpen = optionsDropdown.classList.contains('open');
+    if (isOpen) {
+        closeOptionsMenu();
+    } else {
+        optionsDropdown.classList.add('open');
+        optionsToggleButton.setAttribute('aria-expanded', 'true');
+    }
+}
+
+function loadVersion() {
+    try {
+        settingsVersion.textContent = `Black Screen v${chrome.runtime.getManifest().version}`;
+    } catch (error) {
+        settingsVersion.textContent = '';
+    }
+}
+
+function openSettingsModal() {
+    closeOptionsMenu();
+    settingsBookmarksVisibleInput.checked = document.body.classList.contains('bookmarks-visible');
+    settingsOverlay.classList.add('open');
+    isSettingsModalOpen = true;
+    showUI();
+    // Otherwise Tab would still walk through whatever's behind the modal.
+    settingsBookmarksVisibleInput.focus();
+}
+
+function closeSettingsModal() {
+    settingsOverlay.classList.remove('open');
+    isSettingsModalOpen = false;
+    showUI();
+    // Return focus to what opened the modal, rather than dropping it.
+    optionsToggleButton.focus();
+}
+
+optionsToggleButton.addEventListener('click', () => {
+    // No stopPropagation here (unlike the bookmarks folder triggers): this
+    // click needs to reach the document-level handler below so opening the
+    // options menu also closes any open bookmarks folder dropdown. The
+    // handler's own `.closest('.options-menu')` check already keeps it from
+    // closing the menu this same click just opened.
+    toggleOptionsMenu();
+});
+
+settingsMenuItem.addEventListener('click', openSettingsModal);
+settingsCloseButton.addEventListener('click', closeSettingsModal);
+
+settingsOverlay.addEventListener('click', (event) => {
+    if (event.target === settingsOverlay) {
+        closeSettingsModal();
+    }
+});
+
+settingsBookmarksVisibleInput.addEventListener('change', () => {
+    const isVisible = settingsBookmarksVisibleInput.checked;
     setBookmarksVisible(isVisible);
     saveBookmarksVisible(isVisible);
     if (!isVisible) {
@@ -352,19 +442,24 @@ function toggleBookmarksBar() {
         isBookmarksBarHovered = false;
         showUI();
     }
-}
-
-bookmarksToggleButton.addEventListener('click', toggleBookmarksBar);
+});
 
 document.addEventListener('click', (event) => {
     if (!event.target.closest('.bookmarks-folder')) {
         closeAllBookmarkDropdowns();
+    }
+    if (!event.target.closest('.options-menu')) {
+        closeOptionsMenu();
     }
 });
 
 document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape') {
         closeAllBookmarkDropdowns();
+        closeOptionsMenu();
+        if (settingsOverlay.classList.contains('open')) {
+            closeSettingsModal();
+        }
     }
 });
 
@@ -388,3 +483,4 @@ bookmarksList.addEventListener('wheel', (event) => {
 
 setBookmarksVisible(loadStoredBookmarksVisible());
 loadBookmarksBar();
+loadVersion();
