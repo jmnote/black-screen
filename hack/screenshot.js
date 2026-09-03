@@ -3,9 +3,14 @@
 // on-screen bookmarks bar has something to show, then composites the
 // captured page — in a few different states — into a mock Chrome window
 // (tab strip + toolbar, rounded corners, drop shadow) floating on a soft
-// gradient backdrop, while the overall canvas still lands on the Chrome Web
-// Store's required 1280x800. The fullscreen scenario is the exception: it
-// skips that mock frame, since real fullscreen has no browser chrome.
+// gradient backdrop, on the Chrome Web Store's smaller allowed canvas,
+// 640x400. Deliberately not the larger 1280x800: at that size the mock
+// chrome and the extension's own on-screen UI (bookmarks bar, Settings)
+// render tiny once shrunk to a README thumbnail, whereas the 640x400 canvas
+// makes them all proportionally bigger for free — the chrome/UI's own CSS
+// pixel sizes don't change, but there's less canvas for them to be a small
+// fraction of. The fullscreen scenario is the exception: it skips that mock
+// frame, since real fullscreen has no browser chrome.
 //
 // Note: this must run against Chrome for Testing / Chromium, not a
 // consumer "Google Chrome" install — Google Chrome hard-blocks the
@@ -21,20 +26,25 @@ const puppeteer = require('puppeteer');
 const EXT_DIR = path.resolve(__dirname, '..');
 const OUT_DIR = path.join(EXT_DIR, 'store', 'screenshot');
 
+// Shown in the Settings screenshot in place of the real manifest version
+// (see captureScenario) — a placeholder rather than whatever version
+// happens to be installed when these screenshots are regenerated.
+const SCREENSHOT_VERSION = '0.0.0';
+
 // Each scenario is the same captured page, just in a different state before
 // the shot: the plain default, the bookmarks bar toggled on, and the
 // Settings dialog open.
 const SCENARIOS = [
-    { file: 'screenshot-default.png', bookmarksVisible: false, openSettings: false },
-    { file: 'screenshot-bookmarks.png', bookmarksVisible: true, openSettings: false },
-    { file: 'screenshot-settings.png', bookmarksVisible: false, openSettings: true },
+    { file: 'screenshot1-default.png', bookmarksVisible: false, openSettings: false },
+    { file: 'screenshot4-bookmarks.png', bookmarksVisible: true, openSettings: false },
+    { file: 'screenshot3-settings.png', bookmarksVisible: false, openSettings: true },
 ];
 
-// Chrome Web Store screenshots must be exactly 1280x800 (or 640x400), so
-// the final canvas stays that size — the window floats inside it on a
-// margin, rather than the canvas growing to fit a full-size window.
-const FRAME_WIDTH = 1280;
-const FRAME_HEIGHT = 800;
+// Chrome Web Store screenshots must be exactly 1280x800 or 640x400 — the
+// final canvas stays that size, with the window floating inside it on a
+// margin, rather than growing to fit a full-size window.
+const FRAME_WIDTH = 640;
+const FRAME_HEIGHT = 400;
 const WINDOW_MARGIN = 48;
 const WINDOW_WIDTH = FRAME_WIDTH - WINDOW_MARGIN * 2;
 const WINDOW_HEIGHT = FRAME_HEIGHT - WINDOW_MARGIN * 2;
@@ -250,7 +260,7 @@ function buildFrameHtml({ contentDataUri, faviconDataUri }) {
 
 // Real fullscreen has no browser chrome at all, so unlike the other
 // scenarios this shot skips the mock frame entirely — it's the raw page,
-// filling the full 1280x800 canvas, the same as it fills the actual screen.
+// filling the full 640x400 canvas, the same as it fills the actual screen.
 async function captureFullscreenScreenshot(browser) {
     const page = await browser.newPage();
     await page.setViewport({ width: FRAME_WIDTH, height: FRAME_HEIGHT, deviceScaleFactor: 1 });
@@ -269,7 +279,7 @@ async function captureFullscreenScreenshot(browser) {
         throw new Error('Failed to enter fullscreen for the fullscreen screenshot.');
     }
 
-    const outPath = path.join(OUT_DIR, 'screenshot-fullscreen.png');
+    const outPath = path.join(OUT_DIR, 'screenshot2-fullscreen.png');
     await page.screenshot({ path: outPath });
     await page.close();
     console.log(`Saved ${path.relative(EXT_DIR, outPath)}`);
@@ -299,6 +309,11 @@ async function captureScenario(page, { bookmarksVisible, openSettings }) {
         await page.click('.options-toggle');
         await page.click('.options-dropdown__item[data-action="settings"]');
         await page.waitForSelector('.modal-overlay.open');
+        // Overwrite the real manifest version so this screenshot doesn't go
+        // stale (or need regenerating) on every version bump.
+        await page.evaluate((version) => {
+            document.getElementById('settingsVersion').textContent = `Black Screen v${version}`;
+        }, SCREENSHOT_VERSION);
     }
 
     await new Promise((resolve) => setTimeout(resolve, 300));
