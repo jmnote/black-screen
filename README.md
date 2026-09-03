@@ -24,6 +24,11 @@
 
 ## Preview
 
+<p align="center">
+  <img src="store/assets/screen-window.png" alt="Windowed View" width="380" />
+  <img src="store/assets/screen-full.png" alt="Fullscreen View" width="380" />
+</p>
+
 <table>
   <tr>
     <td align="center">
