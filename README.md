@@ -24,20 +24,39 @@
 
 ## Preview
 
-<p align="center">
-  <img src="store/assets/screen-window.png" alt="Windowed View" width="380" />
-  <img src="store/assets/screen-full.png" alt="Fullscreen View" width="380" />
-</p>
+<table>
+  <tr>
+    <td align="center">
+      <img src="store/screenshot/screenshot-default.png" alt="Default View" width="380" /><br/>
+      <sub>Pure black, until you move the mouse</sub>
+    </td>
+    <td align="center">
+      <img src="store/screenshot/screenshot-fullscreen.png" alt="Fullscreen View" width="380" /><br/>
+      <sub>Fullscreen — no browser chrome at all</sub>
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <img src="store/screenshot/screenshot-bookmarks.png" alt="On-screen Bookmarks Bar" width="380" /><br/>
+      <sub>On-screen bookmarks bar, turned on from Settings</sub>
+    </td>
+    <td align="center">
+      <img src="store/screenshot/screenshot-settings.png" alt="Settings" width="380" /><br/>
+      <sub>Settings — the only menu there is</sub>
+    </td>
+  </tr>
+</table>
 
 ## Features
 
 - **Pure Black**: Opens an instant, distraction-free pure black screen in a new tab.
-- **Auto-hiding Cursor & Fullscreen Button**: The cursor and fullscreen button appear on interaction and automatically fade away after 1 second of inactivity.
+- **Auto-hiding Cursor & Toolbar**: The cursor and on-screen toolbar (fullscreen, bookmarks bar, settings) appear on interaction and automatically fade away after 1 second of inactivity.
 - **Fullscreen Toggle**: Use the on-screen button to enter or exit browser fullscreen mode. Press `Esc` to exit fullscreen.
-- **Bookmarks Bar**: Toggle an on-screen bookmarks bar that mirrors your browser's actual bookmarks bar, since replacing the new tab page hides Chrome's own one.
-- **Touch Support**: Touch start and movement reveal the cursor and fullscreen button on touch-enabled devices.
+- **Bookmarks Bar**: An on-screen bookmarks bar that mirrors your browser's actual bookmarks bar, since replacing the new tab page hides Chrome's own one. Turn it on from Settings (⋮ menu, top right).
+- **Settings**: A single ⋮ menu in the top right — toggle the bookmarks bar and see the installed version. Nothing else to configure.
+- **Touch Support**: Touch start and movement reveal the cursor and toolbar on touch-enabled devices.
 - **Minimal Permissions**: Only reads your bookmarks and favicons to render the on-screen bookmarks bar — nothing is tracked, sent anywhere, or stored outside your browser.
-- **No Clutter**: No settings, no tracking, no ads — just black.
+- **No Clutter**: No tracking, no ads, no unnecessary UI — just black, with a couple of opt-in extras.
 
 ## Installation
 
