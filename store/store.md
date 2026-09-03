@@ -14,8 +14,9 @@ Black Screen is a minimal Chrome extension that opens a pure black screen in a n
 
 FEATURES:
 - Opens a pure black screen in a new tab  
-- No settings, no clutter — just black  
-- Lightweight and private (no permissions required)  
+- Fullscreen toggle, with an auto-hiding cursor and toolbar  
+- Optional on-screen bookmarks bar, since the real one is hidden behind the replaced new tab page  
+- Lightweight and private — nothing is tracked, collected, or sent anywhere  
 - Fully open source at: https://github.com/jmnote/black-screen
 ```
 
@@ -31,11 +32,17 @@ FEATURES:
 </a>
 
 **Screenshots**:  
-<a href="https://github.com/jmnote/black-screen/blob/main/store/assets/screen-window.png">
-  <img src="assets/screen-window.png" alt="Screenshot: Window" width="160" />
+<a href="https://github.com/jmnote/black-screen/blob/main/store/screenshot/screenshot-default.png">
+  <img src="screenshot/screenshot-default.png" alt="Screenshot: Default" width="160" />
 </a>  
-<a href="https://github.com/jmnote/black-screen/blob/main/store/assets/screen-full.png">
-  <img src="assets/screen-full.png" alt="Screenshot: Fullscreen" width="160" />
+<a href="https://github.com/jmnote/black-screen/blob/main/store/screenshot/screenshot-fullscreen.png">
+  <img src="screenshot/screenshot-fullscreen.png" alt="Screenshot: Fullscreen" width="160" />
+</a>  
+<a href="https://github.com/jmnote/black-screen/blob/main/store/screenshot/screenshot-bookmarks.png">
+  <img src="screenshot/screenshot-bookmarks.png" alt="Screenshot: Bookmarks bar" width="160" />
+</a>  
+<a href="https://github.com/jmnote/black-screen/blob/main/store/screenshot/screenshot-settings.png">
+  <img src="screenshot/screenshot-settings.png" alt="Screenshot: Settings" width="160" />
 </a>
 
 **Small promo tile**:  
@@ -64,9 +71,13 @@ FEATURES:
 
 ## Privacy
 
-**Single Purpose**: This extension replaces the new tab with a pure black screen.
+**Single Purpose**: This extension replaces the new tab with a pure black screen, with an optional on-screen bookmarks bar.
 
 ### Permission Justification
+
+**bookmarks**: Chrome's native bookmarks bar is tied to its own New Tab Page — once an extension overrides the new tab, as this one does, that bookmarks bar no longer shows there, even with "Always show bookmarks bar" turned on, and there's no way to bring it back on this page. This permission lets the extension read the Bookmarks Bar folder and offer an on-screen bookmarks bar of its own as an in-page option, off by default — you turn it on from the Settings menu only if and when you want it. Read locally to render the UI only — never transmitted anywhere.
+
+**favicon**: Used with Chrome's built-in favicon API to show each bookmark's site icon next to its name in the on-screen bookmarks bar. Makes no network requests of its own.
 
 **Are you using remote code?** 🔘 No, I am not using remote code.
 

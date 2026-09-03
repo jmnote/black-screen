@@ -1,11 +1,10 @@
-.PHONY: package
+.PHONY: package screenshot
 
-VERSION := $(shell jq -r '.version' manifest.json)
-PACKAGE := dist/black-screen-$(VERSION).zip
-
+# The actual logic lives in hack/*.js (see build.ps1 for the Windows
+# equivalent) so both entry points install the same deps and run the same
+# code instead of drifting apart.
 package:
-	@echo "Packaging $(PACKAGE)..."
-	@mkdir -p dist
-	@rm -f $(PACKAGE)
-	@zip -r $(PACKAGE) manifest.json black-screen.html black-screen.js service-worker.js LICENSE images
-	@echo "✅ Done: $(PACKAGE) created."
+	@cd hack && npm install --no-audit --no-fund && npm run --silent package
+
+screenshot:
+	@cd hack && npm install --no-audit --no-fund && npm run --silent screenshot
