@@ -34,22 +34,22 @@
 <table>
   <tr>
     <td align="center">
-      <img src="store/screenshot/screenshot-default.png" alt="Default View" width="380" /><br/>
+      <img src="store/screenshot/screenshot1-default.png" alt="Default View" width="380" /><br/>
       <sub>Pure black, until you move the mouse</sub>
     </td>
     <td align="center">
-      <img src="store/screenshot/screenshot-fullscreen.png" alt="Fullscreen View" width="380" /><br/>
+      <img src="store/screenshot/screenshot2-fullscreen.png" alt="Fullscreen View" width="380" /><br/>
       <sub>Fullscreen — no browser chrome at all</sub>
     </td>
   </tr>
   <tr>
     <td align="center">
-      <img src="store/screenshot/screenshot-bookmarks.png" alt="On-screen Bookmarks Bar" width="380" /><br/>
-      <sub>On-screen bookmarks bar, turned on from Settings</sub>
+      <img src="store/screenshot/screenshot3-settings.png" alt="Settings" width="380" /><br/>
+      <sub>Settings — the only menu there is</sub>
     </td>
     <td align="center">
-      <img src="store/screenshot/screenshot-settings.png" alt="Settings" width="380" /><br/>
-      <sub>Settings — the only menu there is</sub>
+      <img src="store/screenshot/screenshot4-bookmarks.png" alt="On-screen Bookmarks Bar" width="380" /><br/>
+      <sub>On-screen bookmarks bar, turned on from Settings</sub>
     </td>
   </tr>
 </table>

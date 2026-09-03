@@ -32,17 +32,17 @@ FEATURES:
 </a>
 
 **Screenshots**:  
-<a href="https://github.com/jmnote/black-screen/blob/main/store/screenshot/screenshot-default.png">
-  <img src="screenshot/screenshot-default.png" alt="Screenshot: Default" width="160" />
+<a href="https://github.com/jmnote/black-screen/blob/main/store/screenshot/screenshot1-default.png">
+  <img src="screenshot/screenshot1-default.png" alt="Screenshot: Default" width="160" />
 </a>  
-<a href="https://github.com/jmnote/black-screen/blob/main/store/screenshot/screenshot-fullscreen.png">
-  <img src="screenshot/screenshot-fullscreen.png" alt="Screenshot: Fullscreen" width="160" />
+<a href="https://github.com/jmnote/black-screen/blob/main/store/screenshot/screenshot2-fullscreen.png">
+  <img src="screenshot/screenshot2-fullscreen.png" alt="Screenshot: Fullscreen" width="160" />
 </a>  
-<a href="https://github.com/jmnote/black-screen/blob/main/store/screenshot/screenshot-bookmarks.png">
-  <img src="screenshot/screenshot-bookmarks.png" alt="Screenshot: Bookmarks bar" width="160" />
+<a href="https://github.com/jmnote/black-screen/blob/main/store/screenshot/screenshot3-settings.png">
+  <img src="screenshot/screenshot3-settings.png" alt="Screenshot: Settings" width="160" />
 </a>  
-<a href="https://github.com/jmnote/black-screen/blob/main/store/screenshot/screenshot-settings.png">
-  <img src="screenshot/screenshot-settings.png" alt="Screenshot: Settings" width="160" />
+<a href="https://github.com/jmnote/black-screen/blob/main/store/screenshot/screenshot4-bookmarks.png">
+  <img src="screenshot/screenshot4-bookmarks.png" alt="Screenshot: Bookmarks bar" width="160" />
 </a>
 
 **Small promo tile**:  

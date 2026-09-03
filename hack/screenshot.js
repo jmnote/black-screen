@@ -21,13 +21,18 @@ const puppeteer = require('puppeteer');
 const EXT_DIR = path.resolve(__dirname, '..');
 const OUT_DIR = path.join(EXT_DIR, 'store', 'screenshot');
 
+// Shown in the Settings screenshot in place of the real manifest version
+// (see captureScenario) — a placeholder rather than whatever version
+// happens to be installed when these screenshots are regenerated.
+const SCREENSHOT_VERSION = '0.0.0';
+
 // Each scenario is the same captured page, just in a different state before
 // the shot: the plain default, the bookmarks bar toggled on, and the
 // Settings dialog open.
 const SCENARIOS = [
-    { file: 'screenshot-default.png', bookmarksVisible: false, openSettings: false },
-    { file: 'screenshot-bookmarks.png', bookmarksVisible: true, openSettings: false },
-    { file: 'screenshot-settings.png', bookmarksVisible: false, openSettings: true },
+    { file: 'screenshot1-default.png', bookmarksVisible: false, openSettings: false },
+    { file: 'screenshot4-bookmarks.png', bookmarksVisible: true, openSettings: false },
+    { file: 'screenshot3-settings.png', bookmarksVisible: false, openSettings: true },
 ];
 
 // Chrome Web Store screenshots must be exactly 1280x800 (or 640x400), so
@@ -50,6 +55,21 @@ const CONTENT_HEIGHT = WINDOW_HEIGHT - TAB_STRIP_HEIGHT - TOOLBAR_HEIGHT;
 // screenshots are shrunk down for the README, while the output pixel
 // dimensions — and the Chrome Web Store's required 1280x800 — don't change.
 const CONTENT_ZOOM = 2;
+
+// The mock browser chrome (tab strip + toolbar) and the gradient margin
+// around it get the same zoom treatment, so they read at the same visual
+// weight as the already-zoomed content instead of looking comparatively
+// tiny. The frame page is laid out and captured at half size (same trick as
+// CONTENT_ZOOM above), but the chrome's own measurements — TAB_STRIP_HEIGHT,
+// TOOLBAR_HEIGHT, and every literal px value inside buildFrameHtml's
+// <style> — are deliberately left unscaled, so they end up proportionally
+// bigger against the smaller frame/window/margin around them.
+const ZOOMED_FRAME_WIDTH = FRAME_WIDTH / CONTENT_ZOOM;
+const ZOOMED_FRAME_HEIGHT = FRAME_HEIGHT / CONTENT_ZOOM;
+const ZOOMED_WINDOW_MARGIN = WINDOW_MARGIN / CONTENT_ZOOM;
+const ZOOMED_WINDOW_WIDTH = ZOOMED_FRAME_WIDTH - ZOOMED_WINDOW_MARGIN * 2;
+const ZOOMED_WINDOW_HEIGHT = ZOOMED_FRAME_HEIGHT - ZOOMED_WINDOW_MARGIN * 2;
+const ZOOMED_CONTENT_BOX_HEIGHT = ZOOMED_WINDOW_HEIGHT - TAB_STRIP_HEIGHT - TOOLBAR_HEIGHT;
 
 const SAMPLE_BOOKMARKS = [
     { title: 'GitHub', url: 'https://github.com' },
@@ -115,8 +135,8 @@ function buildFrameHtml({ contentDataUri, faviconDataUri }) {
 <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html, body {
-        width: ${FRAME_WIDTH}px;
-        height: ${FRAME_HEIGHT}px;
+        width: ${ZOOMED_FRAME_WIDTH}px;
+        height: ${ZOOMED_FRAME_HEIGHT}px;
         overflow: hidden;
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
@@ -128,8 +148,8 @@ function buildFrameHtml({ contentDataUri, faviconDataUri }) {
         background: linear-gradient(135deg, #42d292, #647fff);
     }
     .window {
-        width: ${WINDOW_WIDTH}px;
-        height: ${WINDOW_HEIGHT}px;
+        width: ${ZOOMED_WINDOW_WIDTH}px;
+        height: ${ZOOMED_WINDOW_HEIGHT}px;
         background: #fff;
         border-radius: 10px;
         overflow: hidden;
@@ -218,8 +238,12 @@ function buildFrameHtml({ contentDataUri, faviconDataUri }) {
     .omnibox .placeholder { font-size: 12.5px; color: #5f6368; }
     .right-icons { display: flex; align-items: center; gap: 16px; margin-left: 4px; color: #5f6368; }
     .avatar { width: 20px; height: 20px; border-radius: 50%; background: #1a73e8; flex: none; }
-    .content { width: ${WINDOW_WIDTH}px; height: ${CONTENT_HEIGHT}px; }
-    .content img { display: block; width: 100%; height: 100%; }
+    .content { width: ${ZOOMED_WINDOW_WIDTH}px; height: ${ZOOMED_CONTENT_BOX_HEIGHT}px; }
+    /* The captured content image is taller than this box now that the
+       chrome above it (tab strip + toolbar) takes up relatively more of the
+       window — cover+top crops the excess off the bottom (empty black
+       background in every scenario) instead of squashing the image. */
+    .content img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top; }
 </style>
 </head>
 <body>
@@ -284,7 +308,7 @@ async function captureFullscreenScreenshot(browser) {
         throw new Error('Failed to enter fullscreen for the fullscreen screenshot.');
     }
 
-    const outPath = path.join(OUT_DIR, 'screenshot-fullscreen.png');
+    const outPath = path.join(OUT_DIR, 'screenshot2-fullscreen.png');
     await page.screenshot({ path: outPath });
     await page.close();
     console.log(`Saved ${path.relative(EXT_DIR, outPath)}`);
@@ -315,6 +339,11 @@ async function captureScenario(page, { bookmarksVisible, openSettings }) {
         await page.click('.options-toggle');
         await page.click('.options-dropdown__item[data-action="settings"]');
         await page.waitForSelector('.modal-overlay.open');
+        // Overwrite the real manifest version so this screenshot doesn't go
+        // stale (or need regenerating) on every version bump.
+        await page.evaluate((version) => {
+            document.getElementById('settingsVersion').textContent = `Black Screen v${version}`;
+        }, SCREENSHOT_VERSION);
     }
 
     await new Promise((resolve) => setTimeout(resolve, 300));
@@ -358,7 +387,11 @@ async function main() {
             const contentBase64 = await captureScenario(page, scenario);
 
             const framePage = await browser.newPage();
-            await framePage.setViewport({ width: FRAME_WIDTH, height: FRAME_HEIGHT, deviceScaleFactor: 1 });
+            await framePage.setViewport({
+                width: ZOOMED_FRAME_WIDTH,
+                height: ZOOMED_FRAME_HEIGHT,
+                deviceScaleFactor: CONTENT_ZOOM,
+            });
             await framePage.setContent(
                 buildFrameHtml({
                     contentDataUri: `data:image/png;base64,${contentBase64}`,
