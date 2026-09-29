@@ -5,15 +5,9 @@
 </p>
 
 <p align="center">
-  <a href="https://chromewebstore.google.com/detail/black-screen/bdcmhoaiaafaadfkfjcpchckgcdpagkj">
-    <img src="https://img.shields.io/chrome-web-store/v/bdcmhoaiaafaadfkfjcpchckgcdpagkj?logo=googlechrome&logoColor=white&label=Chrome%20Web%20Store" alt="Chrome Web Store" />
-  </a>
-  <a href="https://chromewebstore.google.com/detail/black-screen/bdcmhoaiaafaadfkfjcpchckgcdpagkj">
-    <img src="https://img.shields.io/chrome-web-store/users/bdcmhoaiaafaadfkfjcpchckgcdpagkj?color=blue" alt="Users" />
-  </a>
-  <a href="LICENSE">
-    <img src="https://img.shields.io/badge/License-Apache_2.0-blue.svg" alt="License" />
-  </a>
+  <a href="https://chromewebstore.google.com/detail/black-screen/bdcmhoaiaafaadfkfjcpchckgcdpagkj"><img src="https://img.shields.io/chrome-web-store/v/bdcmhoaiaafaadfkfjcpchckgcdpagkj?logo=googlechrome&logoColor=white&label=Chrome%20Web%20Store" alt="Chrome Web Store" /></a>
+  <a href="https://chromewebstore.google.com/detail/black-screen/bdcmhoaiaafaadfkfjcpchckgcdpagkj"><img src="https://img.shields.io/chrome-web-store/users/bdcmhoaiaafaadfkfjcpchckgcdpagkj?color=blue" alt="Users" /></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache_2.0-blue.svg" alt="License" /></a>
 </p>
 
 <p align="center">
