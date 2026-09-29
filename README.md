@@ -54,13 +54,9 @@
 
 ## Installation
 
-### From Chrome Web Store
 Install directly from the [Chrome Web Store](https://chromewebstore.google.com/detail/black-screen/bdcmhoaiaafaadfkfjcpchckgcdpagkj).
 
-### Manual Installation (For Developers)
-1. Clone or download this repository.
-2. Open `chrome://extensions/` in Chrome and enable **Developer mode** (top right).
-3. Click **Load unpacked** and select the `black-screen` root directory.
+For local development or manual installation from source, see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 
